@@ -31,7 +31,10 @@ public class User {
     @Builder.Default
     private boolean globalAdmin = false;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_authorities", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "authority")
+    @Builder.Default
     private Set<String> authorities = new HashSet<>();
 
     @Builder.Default
