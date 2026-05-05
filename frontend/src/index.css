@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg: #f8f9fa;
+  --color-border: #dfe1e6;
+  --color-text: #172b4d;
+  --color-text-muted: #6b778c;
+  --color-primary: #0052cc;
+  --color-primary-hover: #0065ff;
+  --color-success: #36b37e;
+  --color-warning: #ffab00;
+  --color-danger: #ff5630;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+button {
+  cursor: pointer;
+}
+
+input, textarea, select {
+  font-family: inherit;
+}
