@@ -2,6 +2,7 @@ import { useState, FormEvent, ChangeEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useRegister } from '../hooks/useRegister';
 import type { RegisterRequest } from '../types/auth';
+import axios from 'axios';
 
 function RegisterPage() {
   const [username, setUsername] = useState('');
@@ -26,16 +27,21 @@ function RegisterPage() {
       return;
     }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
+    if (!passwordRegex.test(password)) {
+      setError('Password must be at least 8 characters and contain uppercase, lowercase, digit, and special character');
       return;
     }
 
     try {
       await register.mutateAsync({ username, email, password } as RegisterRequest);
       navigate('/login');
-    } catch {
-      setError('Registration failed. Username or email may already be taken.');
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.data?.error) {
+        setError(err.response.data.error);
+      } else {
+        setError('Registration failed. Username or email may already be taken.');
+      }
     }
   };
 

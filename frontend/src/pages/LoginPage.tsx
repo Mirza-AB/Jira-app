@@ -2,6 +2,7 @@ import { useState, FormEvent, ChangeEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useLogin } from '../hooks/useLogin';
 import type { AuthRequest } from '../types/auth';
+import axios from 'axios';
 
 function LoginPage() {
   const [username, setUsername] = useState('');
@@ -24,7 +25,11 @@ function LoginPage() {
       window.dispatchEvent(new Event('auth-change'));
       navigate('/');
     } catch (err) {
-      setError('Invalid username or password');
+      if (axios.isAxiosError(err) && err.response?.data?.error) {
+        setError(err.response.data.error);
+      } else {
+        setError('Invalid username or password');
+      }
     }
   };
 
