@@ -1,5 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom';
 import AppShell from '../components/AppShell';
+import ProtectedRoute from '../components/ProtectedRoute';
 import HomePage from '../pages/HomePage';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
@@ -14,12 +15,17 @@ export const router = createBrowserRouter([
     element: <RegisterPage />,
   },
   {
-    path: '/',
-    element: <AppShell />,
+    element: <ProtectedRoute />,
     children: [
       {
-        index: true,
-        element: <HomePage />,
+        path: '/',
+        element: <AppShell />,
+        children: [
+          {
+            index: true,
+            element: <HomePage />,
+          },
+        ],
       },
     ],
   },

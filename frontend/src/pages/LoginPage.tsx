@@ -21,6 +21,7 @@ function LoginPage() {
 
     try {
       await login.mutateAsync({ username, password } as AuthRequest);
+      window.dispatchEvent(new Event('auth-change'));
       navigate('/');
     } catch (err) {
       setError('Invalid username or password');
