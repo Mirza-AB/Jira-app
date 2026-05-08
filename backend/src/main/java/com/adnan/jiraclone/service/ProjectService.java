@@ -31,7 +31,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public Project createProject(ProjectDTO dto) {
+    public ProjectDTO createProject(ProjectDTO dto) {
         if (projectRepository.findByKey(dto.getKey()).isPresent()) {
             throw new IllegalArgumentException("Project key already exists");
         }
@@ -59,7 +59,14 @@ public class ProjectService {
             transitionRepository.save(t2);
         }
 
-        return projectRepository.save(savedProject);
+        projectRepository.save(savedProject);
+        ProjectDTO result = new ProjectDTO();
+        result.setId(savedProject.getId());
+        result.setKey(savedProject.getKey());
+        result.setName(savedProject.getName());
+        result.setDescription(savedProject.getDescription());
+        result.setStatuses(savedProject.getAllowedStatuses().stream().map(Status::getName).collect(Collectors.toSet()));
+        return result;
     }
 
     public void addMember(String projectKey, String username, ProjectRole role) {

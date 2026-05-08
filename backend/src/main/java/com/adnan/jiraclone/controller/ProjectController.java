@@ -2,7 +2,6 @@ package com.adnan.jiraclone.controller;
 
 import com.adnan.jiraclone.dto.ProjectDTO;
 import com.adnan.jiraclone.model.ProjectRole;
-import com.adnan.jiraclone.model.Project;
 import com.adnan.jiraclone.service.ProjectService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +19,7 @@ public class ProjectController {
     }
 
     @PostMapping
-    public ResponseEntity<Project> createProject(@RequestBody @Valid ProjectDTO dto) {
+    public ResponseEntity<ProjectDTO> createProject(@RequestBody @Valid ProjectDTO dto) {
         return ResponseEntity.ok(projectService.createProject(dto));
     }
 

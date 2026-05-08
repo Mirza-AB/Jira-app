@@ -30,7 +30,7 @@ public class TicketService {
     }
 
     @Transactional
-    public Ticket create(TicketDTO dto, String reporterUsername) {
+    public TicketDTO create(TicketDTO dto, String reporterUsername) {
         Project project = projectRepository.findByKey(dto.getProjectKey()).orElseThrow(() -> new NoSuchElementException("Project not found"));
         User reporter = userRepository.findByUsername(reporterUsername).orElseThrow(() -> new NoSuchElementException("Reporter not found"));
         Status status = statusRepository.findByProjectId(project.getId()).stream().findFirst().orElseThrow(() -> new IllegalStateException("No statuses defined"));
@@ -49,16 +49,17 @@ public class TicketService {
                 .status(status)
                 .priority(dto.getPriority())
                 .build();
-        return ticketRepository.save(t);
+        Ticket saved = ticketRepository.save(t);
+        return toDTO(saved);
     }
 
-    public Page<Ticket> list(String projectKey, Pageable pageable) {
+    public Page<TicketDTO> list(String projectKey, Pageable pageable) {
         Project project = projectRepository.findByKey(projectKey).orElseThrow(() -> new NoSuchElementException("Project not found"));
-        return ticketRepository.findByProject(project, pageable);
+        return ticketRepository.findByProject(project, pageable).map(this::toDTO);
     }
 
     @Transactional
-    public Ticket changeStatus(Long ticketId, String username, String toStatusName) {
+    public TicketDTO changeStatus(Long ticketId, String username, String toStatusName) {
         Ticket ticket = ticketRepository.findById(ticketId).orElseThrow(() -> new NoSuchElementException("Ticket not found"));
         Project project = ticket.getProject();
         Status to = statusRepository.findByProjectId(project.getId()).stream().filter(s -> s.getName().equals(toStatusName)).findFirst().orElseThrow(() -> new NoSuchElementException("Status not found"));
@@ -77,7 +78,23 @@ public class TicketService {
         }
 
         ticket.setStatus(to);
-        return ticketRepository.save(ticket);
+        Ticket saved = ticketRepository.save(ticket);
+        return toDTO(saved);
+    }
+
+    private TicketDTO toDTO(Ticket ticket) {
+        TicketDTO dto = new TicketDTO();
+        dto.setId(ticket.getId());
+        dto.setTitle(ticket.getTitle());
+        dto.setDescription(ticket.getDescription());
+        dto.setProjectKey(ticket.getProject().getKey());
+        dto.setStatusName(ticket.getStatus().getName());
+        dto.setAssigneeUsername(ticket.getAssignee() != null ? ticket.getAssignee().getUsername() : null);
+        dto.setReporterUsername(ticket.getReporter().getUsername());
+        dto.setPriority(ticket.getPriority());
+        dto.setCreatedAt(ticket.getCreatedAt());
+        dto.setUpdatedAt(ticket.getUpdatedAt());
+        return dto;
     }
 
     private boolean canPerformTransition(ProjectRole role, String from, String to) {
