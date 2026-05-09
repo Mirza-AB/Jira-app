@@ -35,4 +35,9 @@ public class TicketController {
     public ResponseEntity<TicketDTO> changeStatus(@PathVariable Long id, @RequestParam String toStatus, @AuthenticationPrincipal UserDetails user) {
         return ResponseEntity.ok(ticketService.changeStatus(id, user.getUsername(), toStatus));
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<TicketDTO> update(@PathVariable Long id, @RequestBody TicketDTO dto, @AuthenticationPrincipal UserDetails user) {
+        return ResponseEntity.ok(ticketService.updateTicket(id, dto, user.getUsername()));
+    }
 }

@@ -82,6 +82,31 @@ public class TicketService {
         return toDTO(saved);
     }
 
+    @Transactional
+    public TicketDTO updateTicket(Long ticketId, TicketDTO dto, String username) {
+        Ticket ticket = ticketRepository.findById(ticketId).orElseThrow(() -> new NoSuchElementException("Ticket not found"));
+        Project project = ticket.getProject();
+
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new NoSuchElementException("User not found"));
+        ProjectMember member = memberRepository.findByProjectAndUser(project, user).orElseThrow(() -> new NoSuchElementException("User is not a project member"));
+
+        if (!canUpdateTicket(member.getRole())) {
+            throw new SecurityException("Only ADMIN can update ticket assignee");
+        }
+
+        if (dto.getAssigneeUsername() != null) {
+            User newAssignee = userRepository.findByUsername(dto.getAssigneeUsername()).orElseThrow(() -> new NoSuchElementException("Assignee not found"));
+            ticket.setAssignee(newAssignee);
+        }
+
+        Ticket saved = ticketRepository.save(ticket);
+        return toDTO(saved);
+    }
+
+    private boolean canUpdateTicket(ProjectRole role) {
+        return role == ProjectRole.ADMIN;
+    }
+
     private TicketDTO toDTO(Ticket ticket) {
         TicketDTO dto = new TicketDTO();
         dto.setId(ticket.getId());
