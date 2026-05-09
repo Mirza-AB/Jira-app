@@ -3,8 +3,11 @@ package com.adnan.jiraclone.repository;
 import com.adnan.jiraclone.model.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ProjectRepository extends JpaRepository<Project, Long> {
     Optional<Project> findByKey(String key);
+
+    List<Project> findAll();
 }

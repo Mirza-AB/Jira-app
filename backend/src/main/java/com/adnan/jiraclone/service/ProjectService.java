@@ -31,7 +31,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public ProjectDTO createProject(ProjectDTO dto) {
+    public ProjectDTO createProject(ProjectDTO dto, String creatorUsername) {
         if (projectRepository.findByKey(dto.getKey()).isPresent()) {
             throw new IllegalArgumentException("Project key already exists");
         }
@@ -59,6 +59,11 @@ public class ProjectService {
             transitionRepository.save(t2);
         }
 
+        // Auto-add creator as ADMIN member
+        User creator = userRepository.findByUsername(creatorUsername).orElseThrow(() -> new NoSuchElementException("User not found"));
+        ProjectMember adminMember = ProjectMember.builder().project(project).user(creator).role(ProjectRole.ADMIN).build();
+        memberRepository.save(adminMember);
+
         projectRepository.save(savedProject);
         ProjectDTO result = new ProjectDTO();
         result.setId(savedProject.getId());
@@ -78,5 +83,21 @@ public class ProjectService {
         }
         ProjectMember member = ProjectMember.builder().project(project).user(user).role(role).build();
         memberRepository.save(member);
+    }
+
+    public List<ProjectDTO> listProjects() {
+        return projectRepository.findAll().stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    private ProjectDTO toDTO(Project project) {
+        ProjectDTO dto = new ProjectDTO();
+        dto.setId(project.getId());
+        dto.setKey(project.getKey());
+        dto.setName(project.getName());
+        dto.setDescription(project.getDescription());
+        dto.setStatuses(project.getAllowedStatuses().stream().map(Status::getName).collect(Collectors.toSet()));
+        return dto;
     }
 }
