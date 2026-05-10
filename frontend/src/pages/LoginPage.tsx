@@ -1,34 +1,34 @@
-import { useState, FormEvent, ChangeEvent } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useLogin } from '../hooks/useLogin';
-import type { AuthRequest } from '../types/auth';
-import axios from 'axios';
+import { useState, FormEvent, ChangeEvent } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useLogin } from "../hooks/useLogin";
+import type { AuthRequest } from "../types/auth";
+import axios from "axios";
 
 function LoginPage() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
   const login = useLogin();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (!username || !password) {
-      setError('Please fill in all fields');
+      setError("Please fill in all fields");
       return;
     }
 
     try {
       await login.mutateAsync({ username, password } as AuthRequest);
-      window.dispatchEvent(new Event('auth-change'));
-      navigate('/');
+      window.dispatchEvent(new Event("auth-change"));
+      navigate("/");
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.data?.error) {
         setError(err.response.data.error);
       } else {
-        setError('Invalid username or password');
+        setError("Invalid username or password");
       }
     }
   };
@@ -99,12 +99,12 @@ function LoginPage() {
             disabled={login.isPending}
             className="w-full bg-[var(--color-primary)] text-white py-2 rounded font-medium hover:bg-[var(--color-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {login.isPending ? 'Signing in...' : 'Sign in'}
+            {login.isPending ? "Signing in..." : "Sign in"}
           </button>
         </form>
 
         <p className="text-sm text-[var(--color-text-muted)] mt-6 text-center">
-          Don&apos;t have an account?{' '}
+          Don&apos;t have an account?{" "}
           <Link
             to="/register"
             className="text-[var(--color-primary)] hover:underline"

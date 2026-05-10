@@ -3,8 +3,7 @@ import type { Ticket } from '../types/ticket';
 import { Priority } from '../types/ticket';
 import { CreateTicketModel } from '../components/CreateTicketModel';
 import { useTickets } from '../hooks/useTickets';
-
-const PROJECT_KEY = 'DEMOTEST';
+import { useProject } from '../contexts/ProjectContext';
 
 const PRIORITY_COLORS: Record<Priority, string> = {
   [Priority.LOW]: 'bg-green-100 text-green-800',
@@ -15,7 +14,18 @@ const PRIORITY_COLORS: Record<Priority, string> = {
 
 function HomePage() {
   const [showCreateModel, setShowCreateModel] = useState(false);
-  const { data, isLoading, error } = useTickets(PROJECT_KEY);
+  const { selectedProject } = useProject();
+
+  const projectKey = selectedProject?.key || '';
+  const { data, isLoading, error } = useTickets(projectKey);
+
+  if (!selectedProject) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[calc(100vh-64px)]">
+        <p className="text-[var(--color-text-muted)]">No project selected.</p>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -35,7 +45,7 @@ function HomePage() {
 
   const tickets: Ticket[] = data?.content || [];
 
-  const STATUSES = ['OPEN', 'IN_PROGRESS', 'DONE'];
+  const STATUSES = selectedProject.statuses || ['OPEN', 'IN_PROGRESS', 'DONE'];
 
   const ticketsByStatus = (status: string) =>
     tickets.filter((t) => t.statusName === status);
@@ -45,8 +55,10 @@ function HomePage() {
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-xl font-semibold text-[var(--color-text)]">Demo Project</h1>
-            <p className="text-sm text-[var(--color-text-muted)]">{PROJECT_KEY}</p>
+            <h1 className="text-xl font-semibold text-[var(--color-text)]">
+              {selectedProject.name}
+            </h1>
+            <p className="text-sm text-[var(--color-text-muted)]">{selectedProject.key}</p>
           </div>
           <button
             onClick={() => setShowCreateModel(true)}
@@ -56,7 +68,7 @@ function HomePage() {
           </button>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 min-h-[calc(100vh-160px)]">
+        <div className="grid gap-4 min-h-[calc(100vh-160px)]" style={{ gridTemplateColumns: `repeat(${STATUSES.length}, 1fr)` }}>
           {STATUSES.map((status) => (
             <div key={status} className="bg-white rounded-lg border border-[var(--color-border)] flex flex-col">
               <div className="px-3 py-2 border-b border-[var(--color-border)] flex items-center justify-between">
@@ -92,7 +104,7 @@ function HomePage() {
 
       {showCreateModel && (
         <CreateTicketModel
-          projectKey={PROJECT_KEY}
+          projectKey={projectKey}
           onClose={() => setShowCreateModel(false)}
         />
       )}
