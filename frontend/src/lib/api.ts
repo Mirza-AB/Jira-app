@@ -71,6 +71,8 @@ export const ticketApi = {
 };
 
 export const projectApi = {
+  list: () => api.get<Project[]>('/projects').then((res) => res.data),
+
   create: (data: ProjectCreate) =>
     api.post<Project>('/projects', data).then((res) => res.data),
 
