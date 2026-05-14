@@ -1,11 +1,24 @@
 import { useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useProjects } from '../hooks/useProjects';
+import type { Project } from '../types/project';
 
 function AppShell() {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const { projectKey } = useParams<{ projectKey: string }>();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [projectDropdownOpen, setProjectDropdownOpen] = useState(false);
+  const { data: projects = [] } = useProjects();
+
+  const currentProject = projects.find((p) => p.key === projectKey);
+
+  const handleSwitchProject = (project: Project) => {
+    localStorage.setItem('selectedProject', JSON.stringify(project));
+    navigate(`/p/${project.key}`);
+    setProjectDropdownOpen(false);
+  };
 
   const handleLogout = () => {
     logout();
@@ -77,7 +90,56 @@ function AppShell() {
         {/* Header */}
         <header className="h-14 bg-white border-b border-[var(--color-border)] flex items-center justify-between px-5 shrink-0">
           <div className="flex items-center gap-4">
-            <h2 className="text-sm font-medium text-[var(--color-text)]">My project</h2>
+            <div className="relative">
+              <button
+                onClick={() => setProjectDropdownOpen(!projectDropdownOpen)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-[var(--color-bg)] transition text-sm"
+              >
+                <span className="font-medium text-[var(--color-text)]">
+                  {currentProject?.key || projectKey || 'Select project'}
+                </span>
+                <svg className="w-4 h-4 text-[var(--color-text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {projectDropdownOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setProjectDropdownOpen(false)}
+                  />
+                  <div className="absolute left-0 top-full mt-1 w-64 bg-white rounded-lg shadow-lg border border-[var(--color-border)] z-20 py-2 max-h-80 overflow-y-auto">
+                    {projects.map((project) => (
+                      <button
+                        key={project.key}
+                        onClick={() => handleSwitchProject(project)}
+                        className={`w-full text-left px-4 py-2 text-sm hover:bg-[var(--color-bg)] transition ${
+                          project.key === projectKey ? 'bg-[var(--color-bg)] font-medium' : ''
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-[var(--color-text)]">{project.key}</span>
+                          <span className="text-[var(--color-text-muted)]">-</span>
+                          <span className="text-[var(--color-text-muted)] truncate">{project.name}</span>
+                        </div>
+                      </button>
+                    ))}
+                    <div className="border-t border-[var(--color-border)] mt-2 pt-2">
+                      <button
+                        onClick={() => {
+                          setProjectDropdownOpen(false);
+                          navigate('/projects/select');
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm text-[var(--color-primary)] hover:bg-[var(--color-bg)] transition"
+                      >
+                        + Manage projects
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
 
           <div className="relative">
