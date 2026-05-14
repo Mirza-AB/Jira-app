@@ -1,4 +1,4 @@
-import { createBrowserRouter, redirect } from 'react-router-dom';
+import { createBrowserRouter, redirect, Outlet } from 'react-router-dom';
 import AppShell from '../components/AppShell';
 import ProtectedRoute from '../components/ProtectedRoute';
 import HomePage from '../pages/HomePage';
@@ -30,14 +30,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: '/',
-        loader: () => {
-          const stored = localStorage.getItem('selectedProject');
-          if (!stored) {
-            return redirect('/projects/select');
-          }
-          return null;
-        },
+        path: '/p/:projectKey',
         element: <AppShell />,
         children: [
           {
@@ -45,6 +38,22 @@ export const router = createBrowserRouter([
             element: <HomePage />,
           },
         ],
+      },
+      {
+        path: '/',
+        loader: () => {
+          const stored = localStorage.getItem('selectedProject');
+          if (stored) {
+            try {
+              const project = JSON.parse(stored) as Project;
+              return redirect(`/p/${project.key}`);
+            } catch {
+              localStorage.removeItem('selectedProject');
+            }
+          }
+          return redirect('/projects/select');
+        },
+        element: <Outlet />,
       },
     ],
   },

@@ -16,9 +16,9 @@ export const ProjectSelectPage = ({
   const navigate = useNavigate();
 
   const handleSelectProject = (project: Project) => {
-    localStorage.setItem("selectedProject", JSON.stringify(project));
+    localStorage.setItem('selectedProject', JSON.stringify(project));
     onSelectProject(project);
-    navigate("/");
+    navigate(`/p/${project.key}`);
   };
 
   const handleProjectCreated = (project: Project) => {
