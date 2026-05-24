@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import type { Ticket } from '../types/ticket';
 import { Priority } from '../types/ticket';
 import { CreateTicketModel } from '../components/CreateTicketModel';
+import { IssueDetailModel } from '../components/IssueDetailModel';
 import { useTickets } from '../hooks/useTickets';
 import { useProjects } from '../hooks/useProjects';
 import { useChangeTicketStatus } from '../hooks/useChangeTicketStatus';
@@ -17,6 +18,7 @@ const PRIORITY_COLORS: Record<Priority, string> = {
 function HomePage() {
   const [showCreateModel, setShowCreateModel] = useState(false);
   const [statusDropdown, setStatusDropdown] = useState<number | null>(null);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const { projectKey } = useParams<{ projectKey: string }>();
   const key = projectKey || '';
 
@@ -90,6 +92,7 @@ function HomePage() {
                 {ticketsByStatus(status).map((ticket) => (
                   <div
                     key={ticket.id}
+                    onClick={() => setSelectedTicket(ticket)}
                     className="bg-white border border-[var(--color-border)] rounded p-3 hover:shadow-sm cursor-pointer transition"
                   >
                     <div className="flex items-start justify-between gap-2">
@@ -155,6 +158,14 @@ function HomePage() {
         <CreateTicketModel
           projectKey={key}
           onClose={() => setShowCreateModel(false)}
+        />
+      )}
+
+      {selectedTicket && (
+        <IssueDetailModel
+          ticket={selectedTicket}
+          projectKey={key}
+          onClose={() => setSelectedTicket(null)}
         />
       )}
     </>
